@@ -3,34 +3,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Schema;
 using RestSharp;
 
 namespace JiraExtractor
 {
     class Program
     {
-        static void Main(string[] args)
+        static int Main(string[] args)
         {
-            var client = new RestClient("https://jiradrdk.atlassian.net");
-            client.Authenticator = new HttpBasicAuthenticator("xpps_test_user","HejMedDig123");
+            if (!ValidateArgs(args))
+                return 1;
+
+            var username = args[0];
+            var password = args[1];
+
+            var client = new TechTalk.JiraRestClient.JiraClient<DrJiraIssueField>("https://jiradrdk.atlassian.net", username, password);
             
+            var issues = client.GetIssues("DDC");
 
+            //issues.First().fields.assignee
 
-
-            var request = new RestRequest("/rest/api/2/search?jql=assignee=xpps", Method.GET);
-
-            //var response = client.Execute(request);
-
-            var response = client.Execute<RestSharp.Deserializers.JsonDeserializer>(request);
-
-            
-
-            //var issues = response.Data.Deserialize<JiraResult>(response);
-            //response
-
-            var content = response.Content;
+            //var client = new JiraRestClient.JiraRestClient("https://jiradrdk.atlassian.net", "xpps_test_user", "HejMedDig123");
+            //var issue = client.GetIssue("1234");
 
             Console.WriteLine(".");
+            
+            return 0;
+        }
+
+        private static bool ValidateArgs(string[] args)
+        {
+            return args.Count() == 2;
         }
     }
 }
